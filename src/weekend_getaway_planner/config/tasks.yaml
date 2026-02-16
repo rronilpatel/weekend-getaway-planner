@@ -1,17 +1,61 @@
-research_task:
+# src/.../config/tasks.yaml
+
+research_destinations:
   description: >
-    Conduct a thorough research about {topic}
-    Make sure you find any interesting and relevant information given
-    the current year is {current_year}.
+    Research and shortlist 2–4 realistic weekend getaway destinations starting from {home_city}.
+    Focus on places reachable by car (ideally <5–6 hours) or short/affordable flight.
+    Take the {budget} level seriously — exclude anything clearly too expensive.
+    Include approximate drive time or flight duration + cost class (low/medium/high).
   expected_output: >
-    A list with 10 bullet points of the most relevant information about {topic}
+    A clean bullet list of 2–4 destinations, each with:
+    - Destination name and province/state
+    - Travel time & method (drive/flight)
+    - Why it matches the {interests}
+    - Rough cost category for transport
+    - One-sentence highlight
   agent: researcher
 
-reporting_task:
+create_itinerary:
   description: >
-    Review the context you got and expand each topic into a full section for a report.
-    Make sure the report is detailed and contains any and all relevant information.
+    From the researcher's suggestions, choose the single most suitable destination
+    based on {interests}, {budget}, travel time, and overall appeal.
+    Then build a detailed 2-day weekend itinerary (Friday evening to Sunday evening is ok).
+    Include morning/afternoon/evening blocks, specific activities, meal ideas,
+    approximate timings, and how each part ties to the user's interests.
   expected_output: >
-    A fully fledged report with the main topics, each with a full section of information.
-    Formatted as markdown without '```'
-  agent: reporting_analyst
+    Markdown-formatted 2-day itinerary with:
+    - Chosen destination & why selected
+    - Day 1: schedule with times & activities
+    - Day 2: schedule with times & activities
+    - Optional evening return or overnight notes
+  agent: itinerary_planner
+
+validate_budget_logistics:
+  description: >
+    Take the proposed itinerary and estimate **realistic total costs** for:
+    - Transportation (gas/flight/tolls/parking)
+    - Accommodation (1–2 nights, mid-range unless budget forces otherwise)
+    - Food & drinks
+    - Activities / entry fees
+    - Misc (tips, souvenirs, etc.)
+    Compare against the stated {budget} range.
+    Flag if over budget and suggest 2–3 specific ways to reduce cost without destroying the vibe.
+  expected_output: >
+    Clear cost breakdown table or bullets + total estimate.
+    Final verdict: Fits budget / Slightly over (with fixes) / Significantly over (recommend different destination).
+    Include any important logistics warnings (seasonal road conditions, booking lead time, etc.).
+  agent: budget_checker
+
+write_final_guide:
+  description: >
+    Combine outputs from all previous tasks into one cohesive, beautiful markdown weekend getaway guide.
+    Make it warm, readable, and ready to send to a friend or print.
+  expected_output: >
+    Complete Markdown document containing:
+    - Trip overview & destination
+    - Why this trip fits you
+    - Detailed Day 1 & Day 2 itinerary
+    - Realistic cost summary & verdict
+    - Practical tips (packing, driving notes, best season, alternatives)
+    - Enthusiastic closing note
+  agent: travel_writer
