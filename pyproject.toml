@@ -1,0 +1,24 @@
+[project]
+name = "weekend_getaway_planner"
+version = "0.1.0"
+description = "weekend-getaway-planner using crewAI"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "crewai[tools]==1.9.3"
+]
+
+[project.scripts]
+weekend_getaway_planner = "weekend_getaway_planner.main:run"
+run_crew = "weekend_getaway_planner.main:run"
+train = "weekend_getaway_planner.main:train"
+replay = "weekend_getaway_planner.main:replay"
+test = "weekend_getaway_planner.main:test"
+run_with_trigger = "weekend_getaway_planner.main:run_with_trigger"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "crew"
