@@ -1,64 +1,91 @@
 from crewai import Agent, Crew, Process, Task
-from crewai.project import CrewBase, agent, crew, task
+from crewai.project import CrewBase, agent, crew, task, before_kickoff, after_kickoff
 from crewai.agents.agent_builder.base_agent import BaseAgent
 from typing import List
-# If you want to run a snippet of code before or after the crew starts,
-# you can use the @before_kickoff and @after_kickoff decorators
-# https://docs.crewai.com/concepts/crews#example-crew-class-with-decorators
 
 @CrewBase
-class WeekendGetawayPlanner():
-    """WeekendGetawayPlanner crew"""
+class WeekendGetawayPlanner:
+    """Weekend Getaway Planner crew"""
 
     agents: List[BaseAgent]
     tasks: List[Task]
 
-    # Learn more about YAML configuration files here:
-    # Agents: https://docs.crewai.com/concepts/agents#yaml-configuration-recommended
-    # Tasks: https://docs.crewai.com/concepts/tasks#yaml-configuration-recommended
-    
-    # If you would like to add tools to your agents, you can learn more about it here:
-    # https://docs.crewai.com/concepts/agents#agent-tools
     @agent
     def researcher(self) -> Agent:
         return Agent(
-            config=self.agents_config['researcher'], # type: ignore[index]
-            verbose=True
+            config=self.agents_config['researcher'],  # type: ignore[index]
+            verbose=True,
         )
 
     @agent
-    def reporting_analyst(self) -> Agent:
+    def itinerary_planner(self) -> Agent:
         return Agent(
-            config=self.agents_config['reporting_analyst'], # type: ignore[index]
-            verbose=True
+            config=self.agents_config['itinerary_planner'],  # type: ignore[index]
+            verbose=True,
         )
 
-    # To learn more about structured task outputs,
-    # task dependencies, and task callbacks, check out the documentation:
-    # https://docs.crewai.com/concepts/tasks#overview-of-a-task
+    @agent
+    def budget_checker(self) -> Agent:
+        return Agent(
+            config=self.agents_config['budget_checker'],  # type: ignore[index]
+            verbose=True,
+        )
+
+    @agent
+    def travel_writer(self) -> Agent:
+        return Agent(
+            config=self.agents_config['travel_writer'],  # type: ignore[index]
+            verbose=True,
+        )
+
     @task
     def research_task(self) -> Task:
         return Task(
-            config=self.tasks_config['research_task'], # type: ignore[index]
+            config=self.tasks_config['research_destinations'],  # type: ignore[index]
         )
 
     @task
-    def reporting_task(self) -> Task:
+    def itinerary_task(self) -> Task:
         return Task(
-            config=self.tasks_config['reporting_task'], # type: ignore[index]
-            output_file='report.md'
+            config=self.tasks_config['create_itinerary'],  # type: ignore[index]
+        )
+
+    @task
+    def budget_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['validate_budget_logistics'],  # type: ignore[index]
+        )
+
+    @task
+    def writing_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['write_final_guide'],  # type: ignore[index]
+            # Optional: output_file='final_guide.md'  # saves output automatically
         )
 
     @crew
     def crew(self) -> Crew:
         """Creates the WeekendGetawayPlanner crew"""
-        # To learn how to add knowledge sources to your crew, check out the documentation:
-        # https://docs.crewai.com/concepts/knowledge#what-is-knowledge
-
         return Crew(
-            agents=self.agents, # Automatically created by the @agent decorator
-            tasks=self.tasks, # Automatically created by the @task decorator
+            agents=self.agents,   # auto-populated by @agent decorators
+            tasks=self.tasks,     # auto-populated by @task decorators
             process=Process.sequential,
-            verbose=True,
-            # process=Process.hierarchical, # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
+            verbose=True,            # higher verbosity = see more agent conversation
+            # memory=True,        # optional - enable if you want short-term memory
+            # process=Process.hierarchical,  # try later if you want a manager agent
         )
+
+    @before_kickoff
+    def prepare_inputs(self, inputs):
+        """Optional: modify or validate inputs before crew starts"""
+        print("Before kickoff → inputs:", inputs)
+        # You could add defaults here if missing
+        inputs.setdefault("home_city", "Halifax, Nova Scotia")
+        inputs.setdefault("budget", "medium ($400–800 CAD total)")
+        inputs.setdefault("interests", "nature, seafood, relaxing")
+        return inputs
+
+    @after_kickoff
+    def finalize(self, result):
+        print("After kickoff → final result received")
+        return result
